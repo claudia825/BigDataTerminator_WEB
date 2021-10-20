@@ -133,7 +133,7 @@ def fileopen(data):
 
 def newwords():
     # 새로운 용어 추출 - 단순 비교
-    NewList1 = fileopen('natepann_data.txt')
+    NewList1 = fileopen('natepann.txt')
         
     NewList2 = fileopen('SentiWord_Dict.txt')
 
@@ -150,17 +150,22 @@ def newwords():
         load_default_dict=True, 
         integrate_allomorph=True
     )
-
     inputs = wordlist
+    kiwi.load_user_dictionary('new.txt')
+    
+    wlist = []
+    wlists =list(kiwi.extract_words(inputs, min_cnt=1, max_word_len=10, min_score=0.25, pos_score=-3.0, lm_filter=True))
+    for i in range(len(wlists)):
+        temp_str = wlists[i][0].__str__()
+        wlist.append(temp_str)
+    
+    st.write(wlist)
 
-        
-    st.write(kiwi.extract_words(inputs, min_cnt=1, max_word_len=10, min_score=0.25, pos_score=-3.0, lm_filter=True))
 
-
-def an():
+def an(new):
     loaded_model = FastText.load("fasttext")
     Similar = []
-    similar_word_list = list(loaded_model.wv.most_similar("스우파", topn=10)) 
+    similar_word_list = list(loaded_model.wv.most_similar(str(new), topn=10)) 
     for i in range(len(similar_word_list)):
         temp_str = similar_word_list[i][0].__str__()
         Similar.append(temp_str)
@@ -194,8 +199,12 @@ if __name__ == '__main__':
     if len(date) >= 8:
         st.write("크롤링 완료")
 
+        st.subheader("새로운 용어 추출")
         newwords()
 
-        st.subheader("연관 용어 추출")
+        new = st.text_input("""분석할 "새로운 용어"를 입력하세요. : """)
+        
+        if len(new) >= 1:
+            st.subheader("'" + new + "' 의 연관 용어 추출")
 
-        an()
+            an(new)
