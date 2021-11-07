@@ -339,6 +339,8 @@ def NLP(a,b,c) :
     #plt.show()
     st.pyplot(plt)
 
+    st.subheader("Copy and Paste for Senti_Dict :")
+    st.info(str(fkey) + "       " + str(Senti))
 
 if __name__ == '__main__':
 
@@ -405,4 +407,6 @@ if __name__ == '__main__':
                 st.write(" ")
                 st.subheader("분석 결과 :")
                 NLP(sum(pos),sum(neg),sum(neu))
+
+
             
