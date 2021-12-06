@@ -4,15 +4,11 @@ from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 from konlpy.tag import Okt
 import pandas as pd
-import numpy as np
 from kiwipiepy import Kiwi
 from gensim.models import FastText
 from tqdm import tqdm
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import re
-import pandas as pd
 import numpy as np
 import ast
 from konlpy.tag import Komoran
@@ -23,8 +19,8 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.common.keys import Keys
 import streamlit as st
 from matplotlib import font_manager, rc
-import platform
-
+import time
+import SessionState
 
 def crawl(date, fin):
     if len(date) == 8:
@@ -158,7 +154,7 @@ def newwords():
     st.write(wlist)
 
 
-def an(new):
+def sim_words(new):
     loaded_model = FastText.load("fasttext")
     global Similar
     Similar = []
@@ -344,6 +340,16 @@ def NLP(a,b,c) :
 
 if __name__ == '__main__':
 
+    st.set_page_config(
+        page_title="BigDataTerminator",
+        page_icon="books"
+    )
+
+    st.sidebar.title(":raising_hand:빅데이터미네이터:computer::iphone:")
+    st.sidebar.markdown('**온라인 커뮤니티 특화 감성 사전 구축을<br>위한 신조어의 극성값 분석 시스템**', unsafe_allow_html=True)
+
+    st.sidebar.caption("동국대학교 컴퓨터공학종합설계 2021")
+
     #footer 수정
     hide_streamlit_style = """
                 <style>
@@ -358,55 +364,85 @@ if __name__ == '__main__':
     st.title("신조어 극성값 분석 시스템")
 
     st.subheader("BigDataTerminator")
+    st.write(" ")
+
     #st.subheader("온라인 커뮤니티 특화 감성 사전 구축을 위한 신조어의 극성값 분석 시스템")
-
+    st.write(" ")
+    st.write(" ")
+    st.write(" ")
     st.write("데이터 크롤링을 시작할 날짜를 입력해주세요.")
-    st.write("6개월 데이터를 크롤링합니다.")
-    date = st.text_input("시작 날짜 입력. (ex. 20210920) : ", help=None)
-
+    st.caption("6개월 분량의 데이터를 크롤링을 추천합니다. :thumbsup:")
+    date = st.text_input("시작 날짜 입력. (ex. 20210301) : ", help=None)
+    fdate = st.text_input("종료 날짜 입력. (ex. 20210930) : ", help=None)
     # fin = 0
-
     #웹에서 바로 크롤링하면 2일치만 해도 너무 느림... 
     #crawl(date, fin)
-
-    # if fin == 1:
-    #     st.write("크롤링 완료")
-       
-    #     newwords()
-
-    #     st.subheader("연관 용어 추출")
-
+    
     pos = []
     neg = []
     neu = []
     global key, fkey
+    k= 0 
+    timing = 0
+    t = 0
+    m =0
 
+    if len(fdate) >= 8:
+        st.success("크롤링 완료!")
+        timing = timing + 1
     
-    if len(date) >= 8:
-        st.write('크롤링 완료!')
-        st.subheader("신조어 추출")
-        newwords()
+    if timing == 1:
+        session_state = SessionState.get(name="", button_sent=False)
 
-        new = st.text_input("""분석할 "신조어"를 입력하세요. : """)
+        session_state.name = st.write(" ")
+        button_sent = st.button("데이터 분석하기")
 
-        if st.button('신조어 분석'):
-            fkey = new
-            st.subheader("'" + new + "' 의 연관 용어 추출")
-            an(new)
-            k = 0
-            k += 1
+        if button_sent:
+            session_state.button_sent = True
             
-            if k > 0:
-                st.subheader("신조어 : '" + new +  "' 의 감성 분석")
-                with st.spinner("연관용어 분석 중..."):
-                    for i in range(len(Similar)): 
-                        key = Similar[i]
-                        extract_word(fkey,key)
-                st.success("분석 완료")
+        if session_state.button_sent:
+            st.write(" ")
+            st.write(" ")
+            m += 1
 
-                st.write(" ")
-                st.subheader("분석 결과 :")
-                NLP(sum(pos),sum(neg),sum(neu))
+            if m > 0:
+                session_state.next1 = st.subheader("신조어 추출")
+                
+                if session_state.next1:
+                    with st.spinner("데이터 분석 중... ⏳"):
+                        time.sleep(1)
+                        newwords()
+                    st.write("")
+                    
+                    #newwords()
+                    new = st.text_input("""분석할 "신조어"를 입력하세요. """)
+            
+                    session_state.next2 = st.button('신조어 분석')
 
+                    if session_state.next2:
+                        st.write(" ")
+                        st.write(" ")
+                        st.subheader('분석할 신조어 : ' + new)
+                        fkey = new
+                        st.write(" ")
+                        st.subheader('"' + new + '" 의 연관 용어 추출')
+                        sim_words(new)
+                        k += 1
+                        st.write(" ")
+                                
+                        if k >= 1:
+                            st.write(" ")
+                            st.write(" ")
+                            st.subheader('"' + new +  '" 의 감성 분석')
+                            with st.spinner("연관용어 분석 중..."):
+                                for i in range(len(Similar)): 
+                                    key = Similar[i]
+                                    extract_word(fkey,key)
+                            st.success("분석 완료")
+                            st.write(" ")
+                            st.write(" ")
+                            st.subheader("분석 결과 :")
+                            NLP(sum(pos),sum(neg),sum(neu))
 
             
+                        
